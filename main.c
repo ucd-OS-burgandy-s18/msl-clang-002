@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-
+//Peter Gibbs
+//Todo: add reading files
+//todo: make it work
 //the nodes in our tree
 typedef struct treeNode treeNode;
 
