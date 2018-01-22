@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 //Peter Gibbs
-//Todo: add reading files
-//todo: make it work
+//Todo: finish read file
+
 //the nodes in our tree
 typedef struct treeNode treeNode;
 
@@ -14,31 +15,11 @@ struct treeNode{
     treeNode* __right;
 
 };
-//returns 1 if lhs<rhs 2 if lhs==rhs and 0 otherwise
-int compareWord(const char* lhs,const char* rhs){
-    //TODO: add a check so it wont fail when comparing words like (start and starting)
-    //we use this to compare our words in alphabetical order
-    int index=0;
 
 
-    while(1){
-        if(lhs[index]<rhs[index]){
-            return 1;
-        }
-        if(rhs[index]>lhs[index]){
-            return 0;
-        }
-        if(rhs[index]=='\0'&lhs[index]=='\0'){
-            return 2;
-        }
-        index++;
-
-    }
-
-}
-
-//This function will traverse the tree and will either increment the node with our current word,
+//This function will search the tree for our word and will either increment the node with our current word,
 //or will add a new node
+
 void addWord(char* word,treeNode* root){
 
     if(root==NULL) {
@@ -58,17 +39,18 @@ void addWord(char* word,treeNode* root){
         root->__left=NULL;
         root->__right=NULL;
         return;
-    } else if(compareWord(word,root->__word)==1) {
+    } else if(strcmp(word,root->__word)<0) {
         //if the word we are inserting is "less then" the root
         //we traverse to the left child
         if(root->__left==NULL) {
+            //If theres nothing at our left child, we make a new node there
             root->__left = malloc(sizeof(treeNode));
             root->__left->__right=NULL;
             root->__left->__word = NULL;
         }
         addWord(word, root->__left);
         return;
-    }else if(compareWord(word,root->__word)==2){
+    }else if(strcmp(word,root->__word)==0){
         root->__count++;
     }else{
         //if the word is not equal to current node, and it is not to the left
@@ -87,15 +69,15 @@ void addWord(char* word,treeNode* root){
 
 void getFinalWordCount(treeNode* root,FILE *outFile){
     if(root!=NULL){
-        getFinalWordCount(root->__left,outFile);
-        getFinalWordCount(root->__right,outFile);
-        //we print our word
-        fprintf(outFile,root->__word);
-        //then the ':'
-        fprintf(outFile,": ");
-        //then the count
-        fprintf(outFile,"%d",root->__count);
-        fprintf(outFile,"\n");
+
+        getFinalWordCount(root->__left,outFile);//We first go to the left
+
+        fprintf(outFile,root->__word);//we print our word to the file
+        fprintf(outFile,": "); //then the ':'
+        fprintf(outFile,"%d",root->__count);//then the count
+        fprintf(outFile,"\n");//Then move to the next line
+
+        getFinalWordCount(root->__right,outFile);//We then go to the right node
     }
 }
 //destroys the tree and everything in it
@@ -107,9 +89,27 @@ void deleteTree(treeNode* root){
         free(root);
     }
 }
+void readFile(const char* filename){
+    FILE* file=fopen(filename,"r");
+    size_t nread;
+    size_t chunkSize=255*sizeof(char);
+    char *buf = malloc(chunkSize*2);//we keep our buffer at 2x our read size incase we need to read further to the next word
+    char* word;
+    size_t wordSize;
+    if (file) {
 
+        while ((nread = fread(buf, 1, chunkSize, file)) > 0) {
+            //We first walk through our chunk and
+            for(int i=0; i<chunkSize; ++i){
+
+            }
+        }
+        fclose(file);
+    }
+
+}
 int main(int argc, char **argv) {
-
+    readFile("input02.txt");
     FILE* output=fopen("outputtest.txt","w");
     treeNode* root=malloc(sizeof(treeNode));
     root->__word=NULL;
@@ -119,20 +119,15 @@ int main(int argc, char **argv) {
     //TEST FOR TREE STUFF!!!
     char* one="one\0";
     char* three="three\0";
-    char* four="years\0";
-    addWord(three, root);
-    addWord(one, root);
+    char* years="years\0";
 
 
 
-    addWord(one, root);
-    addWord(three, root);
-    //addWord(one, root);
-//addWord(one, root);
     getFinalWordCount(root,output);
-// deleteTree(root);
+    deleteTree(root);
+    free(root);
     fclose(output);
-    //free(root);
+
 
 
     return 0;
