@@ -11,3 +11,5 @@ Our getFinalWordCount function will traverse the tree and write it to a file.  I
 DeleteTree will delete the tree and everything in it.
 
 readFile will go till the end of file, and in conjunction with the isspace function native to C, it will also ensure that it will read space delimited files.
+
+The input file will be called "input01.txt" and the output file will be called "myoutput01.txt"
