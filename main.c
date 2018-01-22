@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//Peter Gibbs
-//Todo: finish read file
+#include <ctype.h>
+//Peter Gibbs & Nicolas Wilhoit
+//This program reads in a space delimited text file, called myinput01.txt, stores it in a binary search tree
+//and then outputs a file containing the number of occurences of each word in the file called myoutput01.txt
 
 //the nodes in our tree
 typedef struct treeNode treeNode;
@@ -83,46 +85,59 @@ void getFinalWordCount(treeNode* root,FILE *outFile){
 //destroys the tree and everything in it
 void deleteTree(treeNode* root){
     if(root!=NULL) {
-        deleteTree(root->__left);
+        deleteTree(root->__left);//we first visit the children of the node and free them before we free the current
+        //node
         deleteTree(root->__right);
-        //free(root->__word);
-        free(root);
+        free(root->__word);//we free the word, as it was allocated separately
+        free(root);//we then free the root
     }
 }
-void readFile(const char* filename){
+void readFile(const char* filename,treeNode* root){
     FILE* file=fopen(filename,"r");
-    size_t nread;
-    size_t chunkSize=255*sizeof(char);
-    char *buf = malloc(chunkSize*2);//we keep our buffer at 2x our read size incase we need to read further to the next word
-    char* word;
-    size_t wordSize;
+
+    size_t chunkSize=1*sizeof(char);//we read 1 character at a time
+    char *buf = malloc(chunkSize);
+    char word[255];//our tempory word
+
+    int wordLen=0;
+
+
     if (file) {
 
-        while ((nread = fread(buf, 1, chunkSize, file)) > 0) {
-            //We first walk through our chunk and
-            for(int i=0; i<chunkSize; ++i){
+        while ((fread(buf, 1, chunkSize, file)) > 0) {
 
+            //fwrite(buf, "%s %d", nread, stdout);
+
+            if(isspace(buf[0])){
+                word[wordLen]='\0';
+                char* wordToInsert=malloc((1+wordLen)*sizeof(char));
+                strcpy(wordToInsert,word);
+                addWord(wordToInsert,root);
+
+                wordLen=0;
+            }else{
+                word[wordLen]=buf[0];
+                wordLen++;
             }
+
+
         }
         fclose(file);
     }
 
 }
 int main(int argc, char **argv) {
-    readFile("input02.txt");
-    FILE* output=fopen("outputtest.txt","w");
+
+
     treeNode* root=malloc(sizeof(treeNode));
+    //we initialize our root so the addWord function has somthing we can pass to it
     root->__word=NULL;
     root->__count=0;
     root->__left=NULL;
     root->__right=NULL;
-    //TEST FOR TREE STUFF!!!
-    char* one="one\0";
-    char* three="three\0";
-    char* years="years\0";
 
-
-
+    readFile("input01.txt",root);//we read our file into the tree
+    FILE* output=fopen("myoutput01.txt","w");
     getFinalWordCount(root,output);
     deleteTree(root);
     free(root);
